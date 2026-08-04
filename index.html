@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainRusher60</title>
+    <link type="text/css" rel="stylesheet" href="styles.css">
+</head>
+<body style="text-align: center; align-content: center">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50" role="presentation">
+        <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
+        <circle cx="25" cy="25" r="20" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"
+                stroke-dasharray="90 125">
+            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
+                              repeatCount="indefinite"/>
+        </circle>
+    </svg>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoct5l7ykNvF5yI8UBC7xvU0Yd-swQyr0",
+            authDomain: "brainrusher60.firebaseapp.com",
+            projectId: "brainrusher60",
+            storageBucket: "brainrusher60.firebasestorage.app",
+            messagingSenderId: "505748704603",
+            appId: "1:505748704603:web:695db414149993220b5e7e",
+            measurementId: "G-J12M311B1F"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        window.logSessionStarted = function(platform, appVersion) {
+            logEvent(analytics, 'session_started', {
+                platform: platform,
+                app_version: appVersion
+            });
+        };
+
+        window.logGameStarted = function(mode, platform, appVersion) {
+            logEvent(analytics, 'game_started', {
+                mode: mode,
+                platform: platform,
+                app_version: appVersion
+            });
+        };
+
+        window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {
+            const params = {
+                reason: reason,
+                reached: reached,
+                expected: expected,
+                elapsed_ms: elapsedMs
+            };
+            if (hasTapped) {
+                params.tapped = tapped;
+            }
+            logEvent(analytics, 'game_failed', params);
+        };
+
+        window.logGameCompleted = function(mode, elapsedMs) {
+            logEvent(analytics, 'game_completed', {
+                mode: mode,
+                elapsed_ms: elapsedMs
+            });
+        };
+
+        window.logGameRestarted = function(previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {
+            const params = {
+                previous_outcome: previousOutcome,
+                previous_reached: previousReached,
+                previous_elapsed_ms: previousElapsedMs
+            };
+            if (hasFailureReason) {
+                params.previous_failure_reason = previousFailureReason;
+            }
+            logEvent(analytics, 'game_restarted', params);
+        };
+    </script>
+    <script type="application/javascript" src="webApp.js"></script>
+</body>
+</html>
