@@ -16,68 +16,90 @@
         </circle>
     </svg>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+        window.ENABLE_ANALYTICS = true; // Replaced by CI during deployment
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDoct5l7ykNvF5yI8UBC7xvU0Yd-swQyr0",
-            authDomain: "brainrusher60.firebaseapp.com",
-            projectId: "brainrusher60",
-            storageBucket: "brainrusher60.firebasestorage.app",
-            messagingSenderId: "505748704603",
-            appId: "1:505748704603:web:695db414149993220b5e7e",
-            measurementId: "G-J12M311B1F"
-        };
+        // Define NoOp fallback functions to prevent Wasm crashes when analytics is disabled
+        window.logSessionStarted = function(platform, appVersion) {};
+        window.logGameStarted = function(mode, platform, appVersion) {};
+        window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {};
+        window.logGameCompleted = function(mode, elapsedMs, targetsCompleted, isNewBest) {};
+        window.logGameRestarted = function(mode, previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {};
+        window.logModeSelected = function(mode) {};
 
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+        if (window.ENABLE_ANALYTICS) {
+            import("https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js").then(({ initializeApp }) => {
+                import("https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js").then(({ getAnalytics, logEvent }) => {
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyDoct5l7ykNvF5yI8UBC7xvU0Yd-swQyr0",
+                        authDomain: "brainrusher60.firebaseapp.com",
+                        projectId: "brainrusher60",
+                        storageBucket: "brainrusher60.firebasestorage.app",
+                        messagingSenderId: "505748704603",
+                        appId: "1:505748704603:web:695db414149993220b5e7e",
+                        measurementId: "G-J12M311B1F"
+                    };
 
-        window.logSessionStarted = function(platform, appVersion) {
-            logEvent(analytics, 'session_started', {
-                platform: platform,
-                app_version: appVersion
+                    const app = initializeApp(firebaseConfig);
+                    const analytics = getAnalytics(app);
+
+                    window.logSessionStarted = function(platform, appVersion) {
+                        logEvent(analytics, 'session_started', {
+                            platform: platform,
+                            app_version: appVersion
+                        });
+                    };
+
+                    window.logGameStarted = function(mode, platform, appVersion) {
+                        logEvent(analytics, 'game_started', {
+                            mode: mode,
+                            platform: platform,
+                            app_version: appVersion
+                        });
+                    };
+
+                    window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {
+                        const params = {
+                            reason: reason,
+                            reached: reached,
+                            expected: expected,
+                            elapsed_ms: elapsedMs
+                        };
+                        if (hasTapped) {
+                            params.tapped = tapped;
+                        }
+                        logEvent(analytics, 'game_failed', params);
+                    };
+
+                    window.logGameCompleted = function(mode, elapsedMs, targetsCompleted, isNewBest) {
+                        logEvent(analytics, 'game_completed', {
+                            mode: mode,
+                            elapsed_ms: elapsedMs,
+                            targets_completed: targetsCompleted,
+                            is_new_best: isNewBest
+                        });
+                    };
+
+                    window.logGameRestarted = function(mode, previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {
+                        const params = {
+                            mode: mode,
+                            previous_outcome: previousOutcome,
+                            previous_reached: previousReached,
+                            previous_elapsed_ms: previousElapsedMs
+                        };
+                        if (hasFailureReason) {
+                            params.previous_failure_reason = previousFailureReason;
+                        }
+                        logEvent(analytics, 'game_restarted', params);
+                    };
+
+                    window.logModeSelected = function(mode) {
+                        logEvent(analytics, 'mode_selected', {
+                            mode: mode
+                        });
+                    };
+                });
             });
-        };
-
-        window.logGameStarted = function(mode, platform, appVersion) {
-            logEvent(analytics, 'game_started', {
-                mode: mode,
-                platform: platform,
-                app_version: appVersion
-            });
-        };
-
-        window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {
-            const params = {
-                reason: reason,
-                reached: reached,
-                expected: expected,
-                elapsed_ms: elapsedMs
-            };
-            if (hasTapped) {
-                params.tapped = tapped;
-            }
-            logEvent(analytics, 'game_failed', params);
-        };
-
-        window.logGameCompleted = function(mode, elapsedMs) {
-            logEvent(analytics, 'game_completed', {
-                mode: mode,
-                elapsed_ms: elapsedMs
-            });
-        };
-
-        window.logGameRestarted = function(previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {
-            const params = {
-                previous_outcome: previousOutcome,
-                previous_reached: previousReached,
-                previous_elapsed_ms: previousElapsedMs
-            };
-            if (hasFailureReason) {
-                params.previous_failure_reason = previousFailureReason;
-            }
-            logEvent(analytics, 'game_restarted', params);
-        };
+        }
     </script>
     <script type="application/javascript" src="webApp.js"></script>
 </body>
