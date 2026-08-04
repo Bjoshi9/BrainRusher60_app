@@ -15,6 +15,71 @@
                               repeatCount="indefinite"/>
         </circle>
     </svg>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+
+        // TODO: Replace with real Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKeyForPlaytest",
+            authDomain: "brainrusher60.firebaseapp.com",
+            projectId: "brainrusher60",
+            storageBucket: "brainrusher60.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456",
+            measurementId: "G-DUMMY12345"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        window.logSessionStarted = function(platform, appVersion) {
+            logEvent(analytics, 'session_started', {
+                platform: platform,
+                app_version: appVersion
+            });
+        };
+
+        window.logGameStarted = function(mode, platform, appVersion) {
+            logEvent(analytics, 'game_started', {
+                mode: mode,
+                platform: platform,
+                app_version: appVersion
+            });
+        };
+
+        window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {
+            const params = {
+                reason: reason,
+                reached: reached,
+                expected: expected,
+                elapsed_ms: elapsedMs
+            };
+            if (hasTapped) {
+                params.tapped = tapped;
+            }
+            logEvent(analytics, 'game_failed', params);
+        };
+
+        window.logGameCompleted = function(mode, elapsedMs) {
+            logEvent(analytics, 'game_completed', {
+                mode: mode,
+                elapsed_ms: elapsedMs
+            });
+        };
+
+        window.logGameRestarted = function(previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {
+            const params = {
+                previous_outcome: previousOutcome,
+                previous_reached: previousReached,
+                previous_elapsed_ms: previousElapsedMs
+            };
+            if (hasFailureReason) {
+                params.previous_failure_reason = previousFailureReason;
+            }
+            logEvent(analytics, 'game_restarted', params);
+        };
+    </script>
     <script type="application/javascript" src="webApp.js"></script>
 </body>
 </html>
