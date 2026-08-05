@@ -20,10 +20,10 @@
 
         // Define NoOp fallback functions to prevent Wasm crashes when analytics is disabled
         window.logSessionStarted = function(platform, appVersion) {};
-        window.logGameStarted = function(mode, platform, appVersion) {};
-        window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {};
-        window.logGameCompleted = function(mode, elapsedMs, targetsCompleted, isNewBest) {};
-        window.logGameRestarted = function(mode, previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {};
+        window.logGameStarted = function(mode, attemptNumber, platform, appVersion) {};
+        window.logGameFailed = function(mode, attemptNumber, reason, reached, expected, elapsedMs, tapped, hasTapped) {};
+        window.logGameCompleted = function(mode, attemptNumber, elapsedMs, targetsCompleted, isNewBest) {};
+        window.logGameRestarted = function(mode, attemptNumber, previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {};
         window.logModeSelected = function(mode) {};
 
         if (window.ENABLE_ANALYTICS) {
@@ -49,16 +49,19 @@
                         });
                     };
 
-                    window.logGameStarted = function(mode, platform, appVersion) {
+                    window.logGameStarted = function(mode, attemptNumber, platform, appVersion) {
                         logEvent(analytics, 'game_started', {
                             mode: mode,
+                            attempt_number: attemptNumber,
                             platform: platform,
                             app_version: appVersion
                         });
                     };
 
-                    window.logGameFailed = function(reason, reached, expected, elapsedMs, tapped, hasTapped) {
+                    window.logGameFailed = function(mode, attemptNumber, reason, reached, expected, elapsedMs, tapped, hasTapped) {
                         const params = {
+                            mode: mode,
+                            attempt_number: attemptNumber,
                             reason: reason,
                             reached: reached,
                             expected: expected,
@@ -70,18 +73,20 @@
                         logEvent(analytics, 'game_failed', params);
                     };
 
-                    window.logGameCompleted = function(mode, elapsedMs, targetsCompleted, isNewBest) {
+                    window.logGameCompleted = function(mode, attemptNumber, elapsedMs, targetsCompleted, isNewBest) {
                         logEvent(analytics, 'game_completed', {
                             mode: mode,
+                            attempt_number: attemptNumber,
                             elapsed_ms: elapsedMs,
                             targets_completed: targetsCompleted,
                             is_new_best: isNewBest
                         });
                     };
 
-                    window.logGameRestarted = function(mode, previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {
+                    window.logGameRestarted = function(mode, attemptNumber, previousOutcome, previousFailureReason, hasFailureReason, previousReached, previousElapsedMs) {
                         const params = {
                             mode: mode,
+                            attempt_number: attemptNumber,
                             previous_outcome: previousOutcome,
                             previous_reached: previousReached,
                             previous_elapsed_ms: previousElapsedMs
